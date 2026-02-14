@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veterinaria</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>Veterina Llanos</h1>
+        <div >
+            <div class="filtro">
+                <h3>Filtrar</h3>
+                <select name="filtro" id="lista_fil">
+                    <option value="todos">todas</option>
+                    <option value="activas">activas</option>
+                    <option value="cerradas">cerradas</option>
+                    <option value="anuladas">anuladas</option>
+                </select>
+            </div>
+            <div id="agregar">
+                <button onclick="agregar()">Agregar</button>
+            </div>
+        </div>
+        <div class="divicion"></div>
+    </header>
+    <main>
+        
+        <div id="citas"></div>
+    </main>
+
+    <div class="modal1">
+        <div class="cuadroadd">
+            <div class="titulo">
+                <h2 id="tituloh2"></h2>
+                <button class="x" onclick="cerrar()">X</button>
+            </div>
+            <div class="opciones">
+                <input type="text" placeholder="Nombre de mascota" id="nombre">
+                <input type="text" placeholder="Propetario" id="propietario">
+                <input type="text" placeholder="Telefono" id="telefono">
+                <div class="fecha">
+                    <input type="date" id="fecha">
+                    <input type="time" id="hora">
+                </div>
+                <div class="selecionmascota">
+                    <p>tipo de mascosta</p>
+                    <select name="" id="mascotas">
+                        <option value="no aplica">No aplica</option>
+                        <option value="perro">Perro</option>
+                        <option value="gato">Gato</option>
+                        <option value="cabra">cabra</option>
+                        <option value="gallina">Gallina</option>
+                        <option value="pato">Pato</option>
+                        <option value="cabra">cabra</option>
+                        <option value="pez">pez</option>
+                        <option value="vaca">vaca</option>
+                        <option value="elefante">elefante</option>
+                        <option value="dinosaurio">dinosaurio</option>
+                    </select>
+                </div>
+                <textarea name="sintomas" id="sintomas" placeholder="Sintomas"></textarea>
+            </div>
+            <div class="end">
+                <button onclick="cerrar()">CERRAR</button>
+                <button id="btfuncion"></button>
+            </div>
+        </div>
+        <div id="error">
+            <p id="msj">error</p>
+        </div>
+    </div>
+
+    <script src="./script.js" defer></script>
+</body>
+</html> 

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veterinaria Llanos | Panel de Gestión</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primario: #4ecdc4;
+            --oscuro: #1a535c;
+            --error: #ff6b6b;
+            --gris-fondo: #f0f2f5;
+            --blanco-cristal: rgba(255, 255, 255, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e0f2f1 0%, #f1f8e9 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Evita el scroll doble */
+        }
+
+        /* --- HEADER PROFESIONAL --- */
+        header {
+            background: var(--blanco-cristal);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 15px 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 { color: var(--oscuro); font-size: 1.5rem; }
+        h1 span { color: var(--primario); }
+
+        .controles { display: flex; align-items: center; gap: 20px; }
+
+        .filtro-grupo { display: flex; flex-direction: column; }
+        .filtro-grupo label { font-size: 0.7rem; font-weight: bold; margin-bottom: 4px; color: #666; }
+
+        select, input, textarea {
+            padding: 10px;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .btn-add {
+            background: var(--primario);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-add:hover { transform: translateY(-2px); background: #45b7af; }
+
+        /* --- ÁREA PRINCIPAL --- */
+        main {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        #citas {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* --- TARJETAS --- */
+        .tag {
+            background: white;
+            padding: 20px;
+            border-radius: 18px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+            border-left: 6px solid var(--primario);
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .tag:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.08); }
+        .tag h3 { color: var(--oscuro); margin-bottom: 5px; }
+        .tag p { font-size: 0.85rem; color: #555; }
+        .tag strong { color: #333; }
+
+        .tag.cerrado { border-left-color: #bdc3c7; opacity: 0.8; }
+        .tag.anulado { border-left-color: var(--error); }
+
+        .botones-tag {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .botones-tag button {
+            flex: 1;
+            padding: 6px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+        }
+
+        /* --- MODAL --- */
+        .modal1 {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(6px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .cuadroadd {
+            background: white;
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 24px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .titulo-modal { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .x { background: #eee; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; }
+
+        .form-grid { display: flex; flex-direction: column; gap: 12px; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        textarea { height: 80px; resize: none; }
+
+        .btn-save {
+            background: var(--oscuro);
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            margin-top: 15px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+
+        #error {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--error);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 10px;
+            display: none;
+            z-index: 3000;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <h1>Veterinaria <span>Llanos</span></h1>
+            <div class="controles">
+                <div class="filtro-grupo">
+                    <label>ESTADO</label>
+                    <select id="lista_fil">
+                        <option value="todos">Todos</option>
+                        <option value="activas">Activas</option>
+                        <option value="cerradas">Cerradas</option>
+                        <option value="anuladas">Anuladas</option>
+                    </select>
+                </div>
+                <button class="btn-add" onclick="abrirModal()">+ NUEVA CITA</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div id="citas"></div>
+    </main>
+
+    <div class="modal1" id="mainModal">
+        <div class="cuadroadd">
+            <div class="titulo-modal">
+                <h2 id="tituloh2">Nueva Cita</h2>
+                <button class="x" onclick="cerrar()">✕</button>
+            </div>
+            
+            <div class="form-grid">
+                <input type="text" placeholder="Nombre Mascota" id="nombre">
+                <input type="text" placeholder="Propietario" id="propietario">
+                <input type="tel" placeholder="Teléfono" id="telefono">
+                <div class="row">
+                    <input type="date" id="fecha">
+                    <input type="time" id="hora">
+                </div>
+                <select id="mascotas">
+                    <option value="Perro">Perro</option>
+                    <option value="Gato">Gato</option>
+                    <option value="Cabra">Cabra</option>
+                    <option value="Gallina">Gallina</option>
+                    <option value="Dinosaurio">Dinosaurio</option>
+                </select>
+                <textarea id="sintomas" placeholder="Sínomas"></textarea>
+                <button id="btfuncion" class="btn-save">GUARDAR</button>
+            </div>
+        </div>
+        
+        <div id="error">
+            <p id="msj"></p>
+        </div>
+    </div>
+
+    <script>
+        // --- VARIABLES Y SELECTORES ---
+        let arraydatos = [];
+        let numeroid = 0;
+        const modal = document.getElementById('mainModal');
+        const container = document.getElementById('citas');
+        const filtro = document.getElementById('lista_fil');
+
+        // --- FUNCIONES DE APERTURA Y CIERRE ---
+        function abrirModal() {
+            limpiarCampos();
+            modal.style.display = "flex";
+            document.getElementById('tituloh2').textContent = "Nueva Cita";
+            const btn = document.getElementById('btfuncion');
+            btn.textContent = "GUARDAR REGISTRO";
+            btn.onclick = () => guardar();
+        }
+
+        function cerrar() {
+            modal.style.display = "none";
+        }
+
+        function limpiarCampos() {
+            ['nombre', 'propietario', 'telefono', 'fecha', 'hora', 'sintomas'].forEach(id => {
+                document.getElementById(id).value = "";
+            });
+        }
+
+        // --- LÓGICA DE GUARDADO (EDICIÓN Y CREACIÓN) ---
+        function guardar(id = 'no') {
+            const data = {
+                nombre: document.getElementById('nombre').value,
+                propietario: document.getElementById('propietario').value,
+                telefono: document.getElementById('telefono').value,
+                fecha: document.getElementById('fecha').value,
+                hora: document.getElementById('hora').value,
+                tipo: document.getElementById('mascotas').value,
+                sintoma: document.getElementById('sintomas').value
+            };
+
+            // Validación simple
+            if (Object.values(data).some(x => x === "")) {
+                showError("Por favor completa todos los campos");
+                return;
+            }
+
+            if (id === 'no') {
+                // Crear
+                arraydatos.push({ ...data, id: numeroid, estado: 'abierta' });
+                numeroid++;
+            } else {
+                // Editar
+                let index = arraydatos.findIndex(x => x.id == id);
+                arraydatos[index] = { ...data, id: id, estado: arraydatos[index].estado };
+            }
+
+            cerrar();
+            render();
+        }
+
+        // --- RENDERIZADO Y FILTRADO ---
+        function render() {
+            container.innerHTML = "";
+            const f = filtro.value;
+
+            const lista = arraydatos.filter(item => {
+                if (f === 'todos') return true;
+                if (f === 'activas') return item.estado === 'abierta';
+                if (f === 'cerradas') return item.estado === 'cerrado';
+                if (f === 'anuladas') return item.estado === 'anulado';
+            });
+
+            lista.forEach(item => {
+                const div = document.createElement('div');
+                div.className = `tag ${item.estado}`;
+                div.innerHTML = `
+                    <small>Cita #${item.id + 1}</small>
+                    <h3>${item.nombre} <span>(${item.tipo})</span></h3>
+                    <p><strong>Dueño:</strong> ${item.propietario}</p>
+                    <p><strong>Contacto:</strong> ${item.telefono}</p>
+                    <p><strong>Fecha:</strong> ${item.fecha} a las ${item.hora}</p>
+                    <p><strong>Síntoma:</strong> ${item.sintoma}</p>
+                    <div class="botones-tag">
+                        <button style="background:#f1c40f" onclick="editar(${item.id})">Editar</button>
+                        <button style="background:#2ecc71" onclick="cambiarEstado(${item.id}, 'cerrado')">Cerrar</button>
+                        <button style="background:#e67e22" onclick="cambiarEstado(${item.id}, 'anulado')">Anular</button>
+                        <button style="background:#e74c3c" onclick="eliminar(${item.id})">Borrar</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // --- OPERACIONES SOBRE TAGS ---
+        function editar(id) {
+            const cita = arraydatos.find(x => x.id == id);
+            modal.style.display = "flex";
+            document.getElementById('tituloh2').textContent = `Editar Cita #${cita.id + 1}`;
+            
+            document.getElementById('nombre').value = cita.nombre;
+            document.getElementById('propietario').value = cita.propietario;
+            document.getElementById('telefono').value = cita.telefono;
+            document.getElementById('fecha').value = cita.fecha;
+            document.getElementById('hora').value = cita.hora;
+            document.getElementById('mascotas').value = cita.tipo;
+            document.getElementById('sintomas').value = cita.sintoma;
+
+            const btn = document.getElementById('btfuncion');
+            btn.textContent = "ACTUALIZAR CAMBIOS";
+            btn.onclick = () => guardar(id);
+        }
+
+        function cambiarEstado(id, nuevoEstado) {
+            let i = arraydatos.findIndex(x => x.id == id);
+            arraydatos[i].estado = nuevoEstado;
+            render();
+        }
+
+        function eliminar(id) {
+            if(confirm("¿Estás seguro de eliminar esta cita?")) {
+                arraydatos = arraydatos.filter(x => x.id != id);
+                render();
+            }
+        }
+
+        function showError(msg) {
+            const errDiv = document.getElementById('error');
+            document.getElementById('msj').textContent = msg;
+            errDiv.style.display = "block";
+            setTimeout(() => errDiv.style.display = "none", 3000);
+        }
+
+        filtro.onchange = render;
+    </script>
+</body>
+</html>
