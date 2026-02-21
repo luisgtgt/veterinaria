@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veterinaria San Patitas</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Montserrat',sans-serif;
+}
+
+body{
+background:linear-gradient(135deg,#e0f7fa,#ffffff);
+min-height:100vh;
+display:flex;
+flex-direction:column;
+}
+
+header{
+background:#2a9d8f;
+color:white;
+padding:20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+box-shadow:0 5px 20px rgba(0,0,0,.1);
+}
+
+header h1{
+font-weight:600;
+}
+
+.controls{
+display:flex;
+gap:10px;
+align-items:center;
+}
+
+select,button,input{
+padding:8px 12px;
+border-radius:15px;
+border:none;
+}
+
+button{
+cursor:pointer;
+background:white;
+color:#2a9d8f;
+font-weight:600;
+transition:.3s;
+}
+
+button:hover{
+transform:scale(1.05);
+}
+
+main{
+flex:1;
+padding:30px;
+}
+
+#citas{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:20px;
+}
+
+.card{
+width:260px;
+background:white;
+border-radius:20px;
+padding:20px;
+text-align:center;
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+position:relative;
+overflow:hidden;
+}
+
+.card img{
+width:90px;
+height:90px;
+border-radius:50%;
+object-fit:cover;
+margin-bottom:10px;
+}
+
+.card h3{
+color:#2a9d8f;
+margin-bottom:5px;
+}
+
+.card button{
+margin-top:10px;
+background:#e76f51;
+color:white;
+}
+
+.card button:hover{
+background:#d65a3b;
+}
+
+/* MODAL */
+
+.modal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.4);
+backdrop-filter:blur(8px);
+justify-content:center;
+align-items:center;
+}
+
+.modal-content{
+background:white;
+padding:30px;
+border-radius:20px;
+width:320px;
+display:flex;
+flex-direction:column;
+gap:10px;
+position:relative;
+}
+
+.modal-content h2{
+text-align:center;
+color:#2a9d8f;
+}
+
+.modal-content input,
+.modal-content textarea,
+.modal-content select{
+border:1px solid #ccc;
+}
+
+.close{
+position:absolute;
+top:10px;
+right:15px;
+cursor:pointer;
+font-size:20px;
+}
+.error{
+color:red;
+font-size:13px;
+text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🐾 Veterinaria San Patitas</h1>
+
+<div class="controls">
+<select id="filtro">
+<option value="todos">Filtrar: Todos</option>
+<option value="Perro">Perros</option>
+<option value="Gato">Gatos</option>
+<option value="Otro">Otros</option>
+</select>
+
+<button id="btnAgregar">+ Nueva Cita</button>
+</div>
+</header>
+
+<main>
+<section id="citas"></section>
+</main>
+
+<div class="modal" id="modal">
+<div class="modal-content">
+<span class="close">&times;</span>
+<h2>Registrar Cita</h2>
+
+<input type="text" id="nombre" placeholder="Nombre Mascota">
+<input type="text" id="dueno" placeholder="Dueño">
+<input type="date" id="fecha">
+
+<select id="tipo">
+<option value="Perro">Perro</option>
+<option value="Gato">Gato</option>
+<option value="Otro">Otro</option>
+</select>
+
+<textarea id="motivo" placeholder="Motivo"></textarea>
+
+<div class="error" id="error"></div>
+
+<button id="guardar">Guardar</button>
+</div>
+</div>
+
+<script>
+const btnAgregar=document.getElementById("btnAgregar");
+const modal=document.getElementById("modal");
+const closeBtn=document.querySelector(".close");
+const guardar=document.getElementById("guardar");
+const citasContainer=document.getElementById("citas");
+const filtro=document.getElementById("filtro");
+const error=document.getElementById("error");
+
+let citas=JSON.parse(localStorage.getItem("citasVeterinaria"))||[];
+
+const imagenes={
+Perro:"https://images.unsplash.com/photo-1517849845537-4d257902454a",
+Gato:"https://images.unsplash.com/photo-1518791841217-8f162f1e1131",
+Otro:"https://images.unsplash.com/photo-1504208434309-cb69f4fe52b0"
+};
+
+function guardarLocal(){
+localStorage.setItem("citasVeterinaria",JSON.stringify(citas));
+}
+
+function renderCitas(){
+citasContainer.innerHTML="";
+let filtroActual=filtro.value;
+
+citas
+.filter(c=>filtroActual==="todos"||c.tipo===filtroActual)
+.forEach((cita,index)=>{
+const card=document.createElement("div");
+card.classList.add("card");
+
+card.innerHTML=`
+<img src="${imagenes[cita.tipo]}" alt="">
+<h3>${cita.nombre}</h3>
+<p><strong>Dueño:</strong> ${cita.dueno}</p>
+<p><strong>Fecha:</strong> ${cita.fecha}</p>
+<p>${cita.motivo}</p>
+<button onclick="eliminarCita(${index})">Eliminar</button>
+`;
+
+citasContainer.appendChild(card);
+
+anime({
+targets:card,
+opacity:[0,1],
+translateY:[40,0],
+duration:600,
+easing:"easeOutExpo"
+});
+});
+}
+
+function eliminarCita(index){
+const card=document.querySelectorAll(".card")[index];
+
+anime({
+targets:card,
+opacity:[1,0],
+translateX:[0,200],
+duration:400,
+easing:"easeInBack",
+complete:()=>{
+citas.splice(index,1);
+guardarLocal();
+renderCitas();
+}
+});
+}
+
+btnAgregar.onclick=()=>{
+modal.style.display="flex";
+anime({
+targets:".modal-content",
+scale:[0.8,1],
+opacity:[0,1],
+duration:400,
+easing:"easeOutBack"
+});
+};
+
+closeBtn.onclick=()=>modal.style.display="none";
+
+guardar.onclick=()=>{
+error.textContent="";
+
+const nombre=document.getElementById("nombre").value.trim();
+const dueno=document.getElementById("dueno").value.trim();
+const fecha=document.getElementById("fecha").value;
+const motivo=document.getElementById("motivo").value.trim();
+const tipo=document.getElementById("tipo").value;
+
+if(!nombre||!dueno||!fecha||!motivo){
+error.textContent="Todos los campos son obligatorios";
+return;
+}
+
+const hoy=new Date();
+const fechaSeleccionada=new Date(fecha);
+
+if(fechaSeleccionada<=hoy){
+error.textContent="Solo puedes registrar citas en fechas futuras";
+return;
+}
+
+citas.push({nombre,dueno,fecha,motivo,tipo});
+guardarLocal();
+renderCitas();
+
+document.querySelectorAll("input,textarea").forEach(e=>e.value="");
+modal.style.display="none";
+};
+
+filtro.onchange=renderCitas;
+
+renderCitas();
+</script>
+
+</body>
+</html>

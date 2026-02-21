@@ -43,9 +43,29 @@ function editatag(id) {
 
 //funcion para crear y colocar los tag sumandose en los que ya existen
 function createtag(item) {
+    let imagen = ""
+    if(item.mascotas == "perro"){
+        imagen = "perro.gif"
+    }else if(item.mascotas == "cabra"){
+        imagen = "cabra.gif"
+    }else if(item.mascotas == "pato"){
+        imagen = "pato.gif"
+    }else if(item.mascotas == "dinosaurio"){
+        imagen = "dinosaurio.gif"
+    }else if(item.mascotas == "elefante"){
+        imagen = "elefante.gif"
+    }else if(item.mascotas == "gato"){
+        imagen = "gato.gif"
+    }else if(item.mascotas == "pez"){
+        imagen = "pez.gif"
+    }else if(item.mascotas == "pollo"){
+        imagen = "pollo.gif"
+    }else if(item.mascotas == "vaca"){
+        imagen = "vaca.gif"
+    }
     citas.innerHTML += `
         <div class='tag'>
-            <img >
+            <img src="${imagen}">
             <h4>cita numero ${item.id + 1}</h4>
             <h3>${item.nombre}</h3>
             <h5>${item.propietario}</h5>
